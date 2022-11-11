@@ -1,0 +1,14 @@
+#file-picker {
+    display: block;
+    float: left;
+}
+
+#iframe {
+    display: block;
+    clear: both;
+}
+
+.create-attr {
+    display: block;
+    float: left;
+}

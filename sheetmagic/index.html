@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>SheetMagic</title>
-    </head>
-    <body>
-        <h1>Hello World!</h1>
-    </body>
+  <head>
+    <title>SheetMagic</title>
+    <link rel="stylesheet" href="index.css" />
+    <script src="index.js" defer></script>
+  </head>
+  <body>
+    <input id="file-picker" type="file" />
+    <button class="create-attr" onclick="createSingleLineText()">
+      Single-line text
+    </button>
+    <button class="create-attr">Multi-line text</button>
+    <button class="create-attr">Number</button>
+    <iframe
+      id="iframe"
+      width="1000"
+      height="1000"
+      srcdoc="<html><body style='margin: 0;'><div id='sheet'></div></body></html>"
+    ></iframe>
+    <code id="code"></code>
+  </body>
 </html>
