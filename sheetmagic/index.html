@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>SheetMagic</title>
+    <title>SheetMagic - Roll20 Character Sheet Creator</title>
     <link rel="stylesheet" href="index.css" />
     <script src="index.js" defer></script>
   </head>
   <body>
-    <input id="file-picker" type="file" />
-    <button class="create-attr" onclick="createSingleLineText()">
-      Single-line text
-    </button>
-    <button class="create-attr">Multi-line text</button>
-    <button class="create-attr">Number</button>
+    <h1>SheetMagic - Roll20 Character Sheet Creator</h1>
+    <div>
+      <label for="sheet-image-url">Sheet image file URL:</label>
+      <input id="sheet-image-url" type="url" onchange="setImageUrl()" />
+    </div>
+    <div>
+      <button onclick="createSingleLineText()">Single-line text</button>
+      <button>Multi-line text</button>
+      <button>Number</button>
+      <button onclick="copyHtml()">Copy HTML</button>
+    </div>
     <iframe
       id="iframe"
       width="1000"
       height="1000"
       srcdoc="<html><body style='margin: 0;'><div id='sheet'></div></body></html>"
     ></iframe>
-    <code id="code"></code>
   </body>
 </html>
