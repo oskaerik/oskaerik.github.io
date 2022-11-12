@@ -1,0 +1,12 @@
+body, h1 {
+    margin: 0;
+}
+
+.hidden {
+    display: none;
+}
+
+#drag {
+    position: absolute;
+    background-color: red;
+}
