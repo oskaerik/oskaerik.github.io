@@ -1,21 +1,18 @@
+const $sheetImageUrl = document.getElementById('sheet-image-url');
+const $newAttribute = document.getElementById('new-attribute');
+const $copyHtml = document.getElementById('copy-html');
+const $iframe = document.getElementById('iframe');
+const $sheet = $iframe.contentDocument.getElementById('sheet');
+
 const state = { imageUrl: null };
 
-const setImageUrl = (imageUrl) => {
-  state.imageUrl = imageUrl;
-  persist();
-};
-
-const getImageUrl = () => state.imageUrl;
-
-const persist = () => {
+function saveState() {
   const queryString = new URLSearchParams(state).toString();
-  console.log('window.location.search:', window.location.search);
-  console.log('queryString:', queryString);
   if (window.location.search != `?${queryString}`)
     window.location.search = queryString;
-};
+}
 
-const setInitialState = () => {
+function loadState() {
   const queryString = new URLSearchParams(window.location.search);
   for (const [key, value] of queryString) {
     if (key in state) state[key] = value;
@@ -24,13 +21,22 @@ const setInitialState = () => {
 
   $sheetImageUrl.value = getImageUrl();
   $sheetImageUrl.dispatchEvent(new Event('change'));
-};
+}
 
-const $sheetImageUrl = document.getElementById('sheet-image-url');
-const $iframe = document.getElementById('iframe');
-const $sheet = $iframe.contentDocument.getElementById('sheet');
+function setImageUrl(imageUrl) {
+  state.imageUrl = imageUrl;
+  saveState();
+}
 
-const setSheetImage = async () => {
+function getImageUrl() {
+  return state.imageUrl;
+}
+
+$sheetImageUrl.addEventListener('change', setSheetImage);
+$newAttribute.addEventListener('click', newAttribute);
+$copyHtml.addEventListener('click', copyHtml);
+
+async function setSheetImage() {
   const imageUrl = $sheetImageUrl.value;
   if (!imageUrl) return;
   setImageUrl(imageUrl);
@@ -49,15 +55,18 @@ const setSheetImage = async () => {
     image.src = this.result;
   };
   reader.readAsDataURL(blob);
-};
+}
 
-const createSingleLineText = () => {
+function newAttribute() {
   alert('Clicked!');
-};
+}
 
-const copyHtml = () => {
+function copyHtml() {
   navigator.clipboard.writeText($sheet.outerHTML);
-};
+}
+
+// Load initial state
+loadState();
 
 /* --- Development --- */
 let s = '';
@@ -67,5 +76,3 @@ document.querySelectorAll('[id]').forEach((el) => {
   s += `const $${name} = document.getElementById('${id}')\n`;
 });
 console.log(s);
-
-setInitialState();

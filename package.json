@@ -15,7 +15,17 @@
     ],
     "parserOptions": {
       "ecmaVersion": "latest"
-    }
+    },
+    "overrides": [
+      {
+        "files": [
+          "*.js"
+        ],
+        "rules": {
+          "require-jsdoc": "off"
+        }
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint ."

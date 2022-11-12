@@ -9,11 +9,11 @@
     <h1>SheetMagic - Roll20 Character Sheet Creator</h1>
     <div>
       <label for="sheet-image-url">Sheet image file URL:</label>
-      <input id="sheet-image-url" type="url" onchange="setSheetImage()" />
+      <input id="sheet-image-url" type="url" />
     </div>
     <div>
-      <button onclick="newAttribute()">New attribute</button>
-      <button onclick="copyHtml()">Copy HTML</button>
+      <button id="new-attribute">New attribute</button>
+      <button id="copy-html">Copy HTML</button>
     </div>
     <iframe
       id="iframe"
