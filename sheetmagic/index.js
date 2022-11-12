@@ -1,5 +1,20 @@
 const state = { imageUrl: null };
 
+const setImageUrl = (imageUrl) => {
+  state.imageUrl = imageUrl;
+  persist();
+};
+
+const getImageUrl = () => state.imageUrl;
+
+const persist = () => {
+  const queryString = new URLSearchParams(state).toString();
+  console.log('window.location.search:', window.location.search);
+  console.log('queryString:', queryString);
+  if (window.location.search != `?${queryString}`)
+    window.location.search = queryString;
+};
+
 const setInitialState = () => {
   const queryString = new URLSearchParams(window.location.search);
   for (const [key, value] of queryString) {
@@ -9,18 +24,6 @@ const setInitialState = () => {
 
   $sheetImageUrl.value = getImageUrl();
   $sheetImageUrl.dispatchEvent(new Event('change'));
-};
-
-const setImageUrl = (imageUrl) => {
-  state.imageUrl = imageUrl;
-  updateQueryString();
-};
-
-const getImageUrl = () => state.imageUrl;
-
-const updateQueryString = () => {
-  const queryString = new URLSearchParams(state).toString();
-  // window.location.search = queryString;
 };
 
 const $sheetImageUrl = document.getElementById('sheet-image-url');
