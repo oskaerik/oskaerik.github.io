@@ -3,25 +3,37 @@ const $newAttribute = document.getElementById('new-attribute');
 const $copyHtml = document.getElementById('copy-html');
 const $iframe = document.getElementById('iframe');
 const $drag = document.getElementById('drag');
-const $sheet = $iframe.contentDocument.getElementById('sheet');
+const $sheet = $iframe.contentDocument.getElementsByClassName('sheet')[0];
 
-const state = { imageUrl: null };
+const state = {};
 
 function saveState() {
   const queryString = new URLSearchParams(state).toString();
-  if (window.location.search != `?${queryString}`)
+  if (window.location.search !== `?${queryString}`)
     window.location.search = queryString;
 }
 
 function loadState() {
   const queryString = new URLSearchParams(window.location.search);
   for (const [key, value] of queryString) {
-    if (key in state) state[key] = value;
+    state[key] = value;
   }
   console.log('Initial state:', state);
 
-  $sheetImageUrl.value = getImageUrl();
+  $sheetImageUrl.value = getImageUrl() || '';
   $sheetImageUrl.dispatchEvent(new Event('change'));
+
+  if (!('x1' in state)) return;
+  const el = document.createElement('input');
+  el.classList.add('property', 'num');
+  el.type = 'number';
+  el.style.left = `${state.x1}px`;
+  el.style.top = `${state.y1}px`;
+  el.style.width = `${state.w1}px`;
+  el.style.height = `${state.h1}px`;
+  el.style.position = 'absolute';
+  $sheet.appendChild(el);
+  el.select();
 }
 
 function setImageUrl(imageUrl) {
@@ -72,14 +84,6 @@ function beginDrag(ev) {
   dragBox.y1 = ev.clientY;
 }
 
-function endDrag() {
-  $sheet.removeEventListener('mousedown', beginDrag);
-  $sheet.removeEventListener('mouseup', endDrag);
-  $sheet.removeEventListener('mousemove', drag);
-  $sheet.style.cursor = 'initial';
-  $drag.classList.toggle('hidden', true);
-}
-
 function drag(ev) {
   dragBox.x2 = ev.clientX;
   dragBox.y2 = ev.clientY;
@@ -98,12 +102,72 @@ function drag(ev) {
   $drag.classList.toggle('hidden', false);
 }
 
+function endDrag() {
+  $sheet.removeEventListener('mousedown', beginDrag);
+  $sheet.removeEventListener('mouseup', endDrag);
+  $sheet.removeEventListener('mousemove', drag);
+  $sheet.style.cursor = 'initial';
+  $drag.classList.toggle('hidden', true);
+  createProperty();
+}
+
+function createProperty() {
+  for (const value of Object.values(dragBox)) if (value === null) return;
+  const xMin = Math.min(dragBox.x1, dragBox.x2);
+  const xMax = Math.max(dragBox.x1, dragBox.x2);
+  const yMin = Math.min(dragBox.y1, dragBox.y2);
+  const yMax = Math.max(dragBox.y1, dragBox.y2);
+  state.x1 = xMin;
+  state.y1 = yMin;
+  state.w1 = xMax - xMin;
+  state.h1 = yMax - yMin;
+  saveState();
+}
+
 function copyHtml() {
   navigator.clipboard.writeText($sheet.outerHTML);
 }
 
-// Load initial state
+// Set initial state
 loadState();
+const sheetStyle = document.createElement('style');
+sheetStyle.innerHTML = `
+.sheet {
+  position: relative;
+  margin: auto;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+button[type='roll']::before {
+  content: '' !important;
+}
+
+.property {
+  position: absolute;
+  background: transparent !important;
+  box-shadow: none;
+  border: none;
+  color: black;
+}
+
+.num {
+  text-align: center;
+}
+
+.roll {
+  cursor: pointer;
+}
+`;
+$iframe.contentDocument.getElementsByTagName('head')[0].appendChild(sheetStyle);
 
 /* --- Development --- */
 let s = '';

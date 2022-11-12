@@ -6,7 +6,10 @@
     <script src="index.js" defer></script>
   </head>
   <body>
-    <h1>SheetMagic - Roll20 Character Sheet Creator</h1>
+    <h1>
+      <a href="https://oskaerik.github.io/sheetmagic/">SheetMagic</a>
+      - Roll20 Character Sheet Creator
+    </h1>
     <div>
       <label for="sheet-image-url">Sheet image file URL:</label>
       <input id="sheet-image-url" type="url" />
@@ -20,7 +23,7 @@
       width="1000"
       height="1000"
       frameborder="0"
-      srcdoc="<html><body style='margin: 0;'><div id='sheet'></div></body></html>"
+      srcdoc="<html><head></head><body style='margin: 0;'><div class='sheet'></div></body></html>"
     ></iframe>
     <div id="drag" class="hidden"></div>
   </body>

@@ -1,12 +1,14 @@
-body, h1 {
-    margin: 0;
+body,
+h1 {
+  margin: 0;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 #drag {
-    position: absolute;
-    background-color: red;
+  position: absolute;
+  background-color: red;
+  opacity: 80%;
 }
