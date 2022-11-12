@@ -1,11 +1,36 @@
-const state = { sheetWidth: null, sheetHeight: null, sheetImage: null };
+const state = { imageUrl: null };
+
+const setInitialState = () => {
+  const queryString = new URLSearchParams(window.location.search);
+  for (const [key, value] of queryString) {
+    if (key in state) state[key] = value;
+  }
+  console.log('Initial state:', state);
+
+  $sheetImageUrl.value = getImageUrl();
+  $sheetImageUrl.dispatchEvent(new Event('change'));
+};
+
+const setImageUrl = (imageUrl) => {
+  state.imageUrl = imageUrl;
+  updateQueryString();
+};
+
+const getImageUrl = () => state.imageUrl;
+
+const updateQueryString = () => {
+  const queryString = new URLSearchParams(state).toString();
+  // window.location.search = queryString;
+};
 
 const $sheetImageUrl = document.getElementById('sheet-image-url');
 const $iframe = document.getElementById('iframe');
 const $sheet = $iframe.contentDocument.getElementById('sheet');
 
-const setImageUrl = async () => {
+const setSheetImage = async () => {
   const imageUrl = $sheetImageUrl.value;
+  if (!imageUrl) return;
+  setImageUrl(imageUrl);
   const response = await fetch(imageUrl);
   const blob = await response.blob();
   const reader = new FileReader();
@@ -40,5 +65,4 @@ document.querySelectorAll('[id]').forEach((el) => {
 });
 console.log(s);
 
-$sheetImageUrl.value = 'https://i.ibb.co/25t9dLN/mazes-and-minotaurs.jpg';
-$sheetImageUrl.dispatchEvent(new Event('change'));
+setInitialState();
