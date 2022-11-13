@@ -16,11 +16,16 @@ const PROP_TYPES = {
   },
 };
 
-const $sheetImageUrl = document.getElementById('sheet-image-url');
-const $propType = document.getElementById('prop-type');
-const $addProp = document.getElementById('add-prop');
 const $iframe = document.getElementById('iframe');
+const $sidebar = document.getElementById('sidebar');
 const $copyHtml = document.getElementById('copy-html');
+const $copyCss = document.getElementById('copy-css');
+const $sidebarFieldUrl = document.getElementById('sidebar-field-url');
+const $sheetImageUrl = document.getElementById('sheet-image-url');
+const $sidebarFieldAddProp = document.getElementById('sidebar-field-add-prop');
+const $addProp = document.getElementById('add-prop');
+const $addPropInfo = document.getElementById('add-prop-info');
+const $template = document.getElementById('template');
 const $drag = document.getElementById('drag');
 const $sheet = $iframe.contentDocument.getElementsByClassName('sheetmagic')[0];
 
@@ -46,15 +51,12 @@ function loadState() {
   $sheetImageUrl.dispatchEvent(new Event('change'));
 
   state.properties.forEach((prop) => {
-    console.log('prop.type:', prop.type);
-    console.log('PROP_TYPES[prop.type]:', PROP_TYPES[prop.type]);
     const { tag, type, classList } = PROP_TYPES[prop.type];
     if (!tag) return;
     const el = document.createElement(tag);
     el.type = type;
     el.classList = classList.join(' ');
     el.style = prop.style;
-    console.log(prop.style);
     el.style.left = `${prop.x}px`;
     el.style.top = `${prop.y}px`;
     el.style.width = `${prop.w}px`;
@@ -62,7 +64,42 @@ function loadState() {
     el.style.position = 'absolute';
     $sheet.appendChild(el);
     el.select();
-    $propType.value = prop.type;
+
+    const sidebarField = $template.content.firstElementChild.cloneNode(true);
+
+    const propType = [].filter.call(
+      sidebarField.getElementsByTagName('select'),
+      (el) => el.name === 'prop-type'
+    )[0];
+    propType.value = prop.type;
+    propType.addEventListener('change', () => {
+      prop.type = propType.value;
+      saveState();
+    });
+
+    const propName = [].filter.call(
+      sidebarField.getElementsByTagName('input'),
+      (el) => el.name === 'prop-name'
+    )[0];
+    propName.value = prop.name || '';
+    propName.addEventListener('change', () => {
+      prop.name = propName.value;
+      saveState();
+    });
+
+    const propDelete = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-delete'
+    )[0];
+    propDelete.addEventListener('click', () => {
+      state.properties = state.properties.filter((el) => el.id !== prop.id);
+      saveState();
+    });
+
+    const propJson = sidebarField.getElementsByTagName('code')[0];
+    propJson.textContent = JSON.stringify(prop);
+
+    $sidebar.append(sidebarField);
   });
 }
 
@@ -94,6 +131,10 @@ async function setSheetImage() {
       $sheet.style.width = `${this.naturalWidth}px`;
       $sheet.style.height = `${this.naturalHeight}px`;
       $sheet.style.backgroundImage = `url(${imageUrl})`;
+      const padding = '20px';
+      $sidebar.style.maxWidth = `calc(100% - ${$sheet.style.width} - ${padding})`;
+      $sheetImageUrl.disabled = true;
+      $sidebarFieldAddProp.hidden = false;
     };
     image.src = this.result;
   };
@@ -104,6 +145,7 @@ function initCreateProp() {
   $sheet.addEventListener('mousedown', initDrag);
   $sheet.addEventListener('mouseup', endDrag);
   $sheet.style.cursor = 'crosshair';
+  $addPropInfo.hidden = false;
 }
 
 const dragBox = { x1: null, y1: null, x2: null, y2: null };
@@ -130,7 +172,7 @@ function drag(ev) {
   $drag.style.top = `${yMin}px`;
   $drag.style.width = `${xMax - xMin}px`;
   $drag.style.height = `${yMax - yMin}px`;
-  $drag.classList.toggle('hidden', false);
+  $drag.hidden = false;
 }
 
 function endDrag() {
@@ -138,7 +180,8 @@ function endDrag() {
   $sheet.removeEventListener('mouseup', endDrag);
   $sheet.removeEventListener('mousemove', drag);
   $sheet.style.cursor = 'initial';
-  $drag.classList.toggle('hidden', true);
+  $drag.hidden = true;
+  $addPropInfo.hidden = true;
   createProp();
 }
 
@@ -153,14 +196,18 @@ function createProp() {
   const w = xMax - xMin;
   const h = yMax - yMin;
   prop = {
-    type: $propType.value,
+    type: 'slt',
+    name: null,
     x: x,
     y: y,
     w: w,
     h: h,
+    id: state.properties.length
+      ? state.properties[state.properties.length - 1].id + 1
+      : 0,
   };
-  if ($propType.value === 'num' || $propType.value === 'slt')
-    prop.style = `font-size: ${Math.round(0.6 * h)}px;`;
+  // if ($propType.value === 'num' || $propType.value === 'slt')
+  //   prop.style = `font-size: ${Math.round(0.6 * h)}px;`;
   state.properties.push(prop);
   saveState();
 }

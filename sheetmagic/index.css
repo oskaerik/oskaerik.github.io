@@ -1,15 +1,31 @@
 body {
   margin: 0;
+  padding: 20px;
   font-family: sans-serif;
 }
 
 h1 {
   margin: 0;
   padding: 10px 0;
+  text-align: center;
 }
 
-.hidden {
-  display: none;
+#iframe {
+  float: left;
+  margin-right: 20px;
+}
+
+#sidebar {
+  float: left;
+  min-width: 500px;
+}
+
+.sidebar-field {
+  margin-bottom: 20px;
+}
+
+#sheet-image-url {
+  width: 100%;
 }
 
 #drag {

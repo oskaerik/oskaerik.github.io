@@ -6,33 +6,44 @@
     <script src="index.js" defer></script>
   </head>
   <body>
-    <h1>
-      <a href="https://oskaerik.github.io/sheetmagic/">SheetMagic</a>
-      - Roll20 Character Sheet Creator
-    </h1>
-    <div>
-      <label for="sheet-image-url">Sheet image URL:</label>
-      <input id="sheet-image-url" type="url" />
-    </div>
-    <div>
-      <label for="prop-type">Property:</label>
-      <select id="prop-type" name="prop-type">
-        <option value="slt">Single-line text</option>
-        <option value="mlt">Multi-line text</option>
-        <option value="num">Number</option>
-      </select>
-      <button id="add-prop">Add</button>
-    </div>
+    <h1>SheetMagic - Roll20 Character Sheet Creator</h1>
     <iframe
       id="iframe"
-      width="1000"
-      height="1000"
+      width="0"
+      height="0"
       frameborder="0"
       srcdoc="<html><head></head><body style='margin: 0;'><div class='sheetmagic'></div></body></html>"
     ></iframe>
-    <div>
-      <button id="copy-html">Copy HTML</button>
+    <div id="sidebar">
+      <div class="sidebar-field">
+        <button id="copy-html">Copy HTML</button>
+        <button id="copy-css">Copy CSS</button>
+      </div>
+      <div id="sidebar-field-url" class="sidebar-field">
+        <label for="sheet-image-url">
+          Sheet image URL (max recommended width is 1000px):
+        </label>
+        <input id="sheet-image-url" type="url" />
+      </div>
+      <div id="sidebar-field-add-prop" class="sidebar-field" hidden>
+        <button id="add-prop">Add property</button>
+        <span id="add-prop-info" hidden>
+          Click and drag to place a new property on the sheet
+        </span>
+      </div>
+      <template id="template">
+        <div class="sidebar-field">
+          <button name="prop-delete">×</button>
+          <select name="prop-type">
+            <option value="slt">Single-line text</option>
+            <option value="mlt">Multi-line text</option>
+            <option value="num">Number</option>
+          </select>
+          <input name="prop-name" type="text" placeholder="Name" />
+          <code name="prop-json"></code>
+        </div>
+      </template>
     </div>
-    <div id="drag" class="hidden"></div>
+    <div id="drag" hidden></div>
   </body>
 </html>
