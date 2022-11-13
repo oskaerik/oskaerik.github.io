@@ -6,19 +6,22 @@ const $drag = document.getElementById('drag');
 const $sheet = $iframe.contentDocument.getElementsByClassName('sheet')[0];
 
 const state = {};
+const allowedKeys = new Set(['imageUrl']);
 
 function saveState() {
-  const queryString = new URLSearchParams(state).toString();
+  const queryString = new URLSearchParams({
+    json: JSON.stringify(state),
+  }).toString();
   if (window.location.search !== `?${queryString}`)
     window.location.search = queryString;
 }
 
 function loadState() {
   const queryString = new URLSearchParams(window.location.search);
-  for (const [key, value] of queryString) {
-    state[key] = value;
-  }
-  console.log('Initial state:', state);
+  json = JSON.parse(queryString.get('json'));
+  if (!json) return;
+  for (const key in json) if (allowedKeys.has(key)) state[key] = json[key];
+  console.log('Loaded state from JSON:', state);
 
   $sheetImageUrl.value = getImageUrl() || '';
   $sheetImageUrl.dispatchEvent(new Event('change'));
