@@ -11,20 +11,28 @@
       - Roll20 Character Sheet Creator
     </h1>
     <div>
-      <label for="sheet-image-url">Sheet image file URL:</label>
+      <label for="sheet-image-url">Sheet image URL:</label>
       <input id="sheet-image-url" type="url" />
     </div>
     <div>
-      <button id="new-attribute">New attribute</button>
-      <button id="copy-html">Copy HTML</button>
+      <label for="prop-type">Property:</label>
+      <select id="prop-type" name="prop-type">
+        <option value="slt">Single-line text</option>
+        <option value="mlt">Multi-line text</option>
+        <option value="num">Number</option>
+      </select>
+      <button id="add-prop">Add</button>
     </div>
     <iframe
       id="iframe"
       width="1000"
       height="1000"
       frameborder="0"
-      srcdoc="<html><head></head><body style='margin: 0;'><div class='sheet'></div></body></html>"
+      srcdoc="<html><head></head><body style='margin: 0;'><div class='sheetmagic'></div></body></html>"
     ></iframe>
+    <div>
+      <button id="copy-html">Copy HTML</button>
+    </div>
     <div id="drag" class="hidden"></div>
   </body>
 </html>
