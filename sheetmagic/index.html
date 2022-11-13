@@ -1,49 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>SheetMagic - Roll20 Character Sheet Creator</title>
-    <link rel="stylesheet" href="index.css" />
-    <script src="index.js" defer></script>
+    <meta
+      http-equiv="refresh"
+      content="0; url=https://oskaerik.github.io/sheetmagic/v1/"
+    />
   </head>
-  <body>
-    <h1>SheetMagic - Roll20 Character Sheet Creator</h1>
-    <iframe
-      id="iframe"
-      width="0"
-      height="0"
-      frameborder="0"
-      srcdoc="<html><head></head><body style='margin: 0;'><div class='sheetmagic'></div></body></html>"
-    ></iframe>
-    <div id="sidebar">
-      <div class="sidebar-field">
-        <button id="copy-html">Copy HTML</button>
-        <button id="copy-css">Copy CSS</button>
-      </div>
-      <div id="sidebar-field-url" class="sidebar-field">
-        <label for="sheet-image-url">
-          Sheet image URL (max recommended width is 1000px):
-        </label>
-        <input id="sheet-image-url" type="url" />
-      </div>
-      <div id="sidebar-field-add-prop" class="sidebar-field" hidden>
-        <button id="add-prop">Add property</button>
-        <span id="add-prop-info" hidden>
-          Click and drag to place a new property on the sheet
-        </span>
-      </div>
-      <template id="template">
-        <div class="sidebar-field">
-          <button name="prop-delete">×</button>
-          <select name="prop-type">
-            <option value="slt">Single-line text</option>
-            <option value="mlt">Multi-line text</option>
-            <option value="num">Number</option>
-          </select>
-          <input name="prop-name" type="text" placeholder="Name" />
-          <code name="prop-json"></code>
-        </div>
-      </template>
-    </div>
-    <div id="drag" hidden></div>
-  </body>
+  <body></body>
 </html>

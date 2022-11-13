@@ -14,23 +14,89 @@ const PROP_TYPES = {
     type: null,
     classList: ['sm-prop', 'sm-mlt'],
   },
+  roll: {
+    tag: 'button',
+    type: 'roll',
+    classList: ['sm-prop', 'sm-roll'],
+  },
 };
 
 const $iframe = document.getElementById('iframe');
 const $sidebar = document.getElementById('sidebar');
+const $sidebarFieldCopy = document.getElementById('sidebar-field-copy');
 const $copyHtml = document.getElementById('copy-html');
 const $copyCss = document.getElementById('copy-css');
-const $sidebarFieldUrl = document.getElementById('sidebar-field-url');
 const $sheetImageUrl = document.getElementById('sheet-image-url');
 const $sidebarFieldAddProp = document.getElementById('sidebar-field-add-prop');
 const $addProp = document.getElementById('add-prop');
 const $addPropInfo = document.getElementById('add-prop-info');
 const $template = document.getElementById('template');
 const $drag = document.getElementById('drag');
-const $sheet = $iframe.contentDocument.getElementsByClassName('sheetmagic')[0];
+let $sheet = null;
+let $sheetStyle = null;
+
+// Set srcdoc and init when loaded
+window.addEventListener('message', (e) => {
+  if (e.data === 'loaded') init();
+});
+$iframe.srcdoc =
+  "<html><head></head><body style='margin: 0;'><div class='sheetmagic'></div><script>window.parent.postMessage('loaded', '*');</script></body></html>";
 
 const state = { properties: [] };
 const allowedKeys = new Set(['imageUrl', 'properties']);
+
+function init() {
+  $sheet = $iframe.contentDocument.getElementsByClassName('sheetmagic')[0];
+  $sheetStyle = document.createElement('style');
+  $iframe.contentDocument
+    .getElementsByTagName('head')[0]
+    .appendChild($sheetStyle);
+  $sheetStyle.innerHTML = `\
+.sheetmagic {
+  position: relative;
+  margin: auto;
+}
+
+.sm-prop {
+  position: absolute;
+  background: transparent !important;
+  box-shadow: none;
+  border: none;
+  color: black;
+}
+
+.sm-prop:focus {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.sm-mlt {
+  font-size: 16px;
+}
+
+.sm-num {
+  text-align: center;
+}
+
+.sm-roll {
+  cursor: pointer;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+button[type='roll']::before {
+  content: '' !important;
+}
+`;
+  loadState();
+}
 
 function saveState() {
   const queryString = new URLSearchParams({
@@ -47,25 +113,34 @@ function loadState() {
   for (const key in json) if (allowedKeys.has(key)) state[key] = json[key];
   console.log('Loaded state from JSON:', state);
 
+  $sheet.setAttribute('data-sheetmagic-url', window.location.href);
+
   $sheetImageUrl.value = getImageUrl() || '';
   $sheetImageUrl.dispatchEvent(new Event('change'));
 
   state.properties.forEach((prop) => {
-    const { tag, type, classList } = PROP_TYPES[prop.type];
-    if (!tag) return;
-    const el = document.createElement(tag);
-    el.type = type;
-    el.classList = classList.join(' ');
-    el.style = prop.style;
-    el.style.left = `${prop.x}px`;
-    el.style.top = `${prop.y}px`;
-    el.style.width = `${prop.w}px`;
-    el.style.height = `${prop.h}px`;
-    el.style.position = 'absolute';
-    $sheet.appendChild(el);
-    el.select();
-
     const sidebarField = $template.content.firstElementChild.cloneNode(true);
+
+    const propDelete = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-delete'
+    )[0];
+    propDelete.addEventListener('click', () => {
+      state.properties = state.properties.filter((el) => el.id !== prop.id);
+      saveState();
+    });
+
+    const propHighlight = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-highlight'
+    )[0];
+    propHighlight.addEventListener('click', () => {
+      const el = [].filter.call(
+        $sheet.getElementsByTagName('*'),
+        (el) => parseInt(el.getAttribute('data-sm-id')) === prop.id
+      )[0];
+      el.focus();
+    });
 
     const propType = [].filter.call(
       sidebarField.getElementsByTagName('select'),
@@ -83,16 +158,19 @@ function loadState() {
     )[0];
     propName.value = prop.name || '';
     propName.addEventListener('change', () => {
-      prop.name = propName.value;
+      prop.name = propName.value.toLowerCase().replace(/[^a-z]/g, '');
+      propName.value = prop.name;
       saveState();
     });
 
-    const propDelete = [].filter.call(
-      sidebarField.getElementsByTagName('button'),
-      (el) => el.name === 'prop-delete'
+    const propValue = [].filter.call(
+      sidebarField.getElementsByTagName('input'),
+      (el) => el.name === 'prop-value'
     )[0];
-    propDelete.addEventListener('click', () => {
-      state.properties = state.properties.filter((el) => el.id !== prop.id);
+    if (prop.type === 'roll') propValue.hidden = false;
+    propValue.value = prop.value || '';
+    propValue.addEventListener('change', () => {
+      prop.value = propValue.value;
       saveState();
     });
 
@@ -100,6 +178,27 @@ function loadState() {
     propJson.textContent = JSON.stringify(prop);
 
     $sidebar.append(sidebarField);
+
+    const { tag, type, classList } = PROP_TYPES[prop.type];
+    const el = document.createElement(tag);
+    if (prop.type === 'roll') {
+      el.name = `roll_${propName.value}`;
+      el.value = propValue.value;
+    } else {
+      el.name = `attr_${propName.value}`;
+    }
+    el.setAttribute('data-sm-id', prop.id);
+    el.type = type;
+    el.classList = classList.join(' ');
+    el.style.left = `${prop.x}px`;
+    el.style.top = `${prop.y}px`;
+    el.style.width = `${prop.w}px`;
+    el.style.height = `${prop.h}px`;
+    el.style.position = 'absolute';
+    if (prop.type === 'num' || prop.type === 'slt')
+      el.style.fontSize = `${Math.round(0.6 * prop.h)}px`;
+    $sheet.appendChild(el);
+    el.focus();
   });
 }
 
@@ -115,6 +214,7 @@ function getImageUrl() {
 $sheetImageUrl.addEventListener('change', setSheetImage);
 $addProp.addEventListener('click', initCreateProp);
 $copyHtml.addEventListener('click', copyHtml);
+$copyCss.addEventListener('click', copyCss);
 
 async function setSheetImage() {
   const imageUrl = $sheetImageUrl.value;
@@ -134,6 +234,7 @@ async function setSheetImage() {
       const padding = '20px';
       $sidebar.style.maxWidth = `calc(100% - ${$sheet.style.width} - ${padding})`;
       $sheetImageUrl.disabled = true;
+      $sidebarFieldCopy.hidden = false;
       $sidebarFieldAddProp.hidden = false;
     };
     image.src = this.result;
@@ -198,6 +299,7 @@ function createProp() {
   prop = {
     type: 'slt',
     name: null,
+    value: null,
     x: x,
     y: y,
     w: w,
@@ -206,8 +308,6 @@ function createProp() {
       ? state.properties[state.properties.length - 1].id + 1
       : 0,
   };
-  // if ($propType.value === 'num' || $propType.value === 'slt')
-  //   prop.style = `font-size: ${Math.round(0.6 * h)}px;`;
   state.properties.push(prop);
   saveState();
 }
@@ -216,60 +316,6 @@ function copyHtml() {
   navigator.clipboard.writeText($sheet.outerHTML);
 }
 
-// Set initial state
-loadState();
-const sheetStyle = document.createElement('style');
-sheetStyle.innerHTML = `
-.sheetmagic {
-  position: relative;
-  margin: auto;
+function copyCss() {
+  navigator.clipboard.writeText($sheetStyle.innerHTML);
 }
-
-.sheetmagic .sm-prop {
-  position: absolute;
-  background: transparent !important;
-  box-shadow: none;
-  border: none;
-  color: black;
-}
-
-.sheetmagic .sm-prop:focus {
-  background: rgba(0, 0, 0, 0.1) !important;
-}
-
-.sheetmagic .sm-mlt {
-  font-size: 16px;
-}
-
-.sheetmagic .sm-num {
-  text-align: center;
-}
-
-.sheetmagic .sm-roll {
-  cursor: pointer;
-}
-
-.sheetmagic input::-webkit-outer-spin-button,
-.sheetmagic input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.sheetmagic input[type='number'] {
-  -moz-appearance: textfield;
-}
-
-.sheetmagic button[type='roll']::before {
-  content: '' !important;
-}
-`;
-$iframe.contentDocument.getElementsByTagName('head')[0].appendChild(sheetStyle);
-
-/* --- Development --- */
-let s = '';
-document.querySelectorAll('[id]').forEach((el) => {
-  const { id } = el;
-  const name = id.replace(/-(.)/g, (_, c) => c.toUpperCase());
-  s += `const $${name} = document.getElementById('${id}')\n`;
-});
-console.log(s);
