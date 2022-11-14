@@ -34,7 +34,9 @@ const $copyCss = document.getElementById('copy-css');
 const $sheetImageUrl = document.getElementById('sheet-image-url');
 const $sidebarFieldAddProp = document.getElementById('sidebar-field-add-prop');
 const $addProp = document.getElementById('add-prop');
+const $hotkeysInfo = document.getElementById('hotkeys-info');
 const $addPropInfo = document.getElementById('add-prop-info');
+const $copyPropInfo = document.getElementById('copy-prop-info');
 const $template = document.getElementById('template');
 const $drag = document.getElementById('drag');
 let $sheet = null;
@@ -54,6 +56,15 @@ function init() {
   $sheet = $iframe.contentDocument.getElementsByClassName('sheetmagic')[0];
   $iframe.contentDocument.addEventListener('keydown', (ev) => {
     if (ev.key === 'a') $addProp.click();
+  });
+  $iframe.contentDocument.addEventListener('keydown', (ev) => {
+    if (ev.key === 'c') {
+      const copyButtons = [].filter.call(
+        $sidebar.getElementsByTagName('button'),
+        (el) => el.name === 'prop-copy'
+      );
+      if (copyButtons.length > 0) copyButtons[copyButtons.length - 1].click();
+    }
   });
   $sheetStyle = document.createElement('style');
   $iframe.contentDocument
@@ -154,6 +165,26 @@ function loadState() {
       el.focus();
     });
 
+    const propCopy = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-copy'
+    )[0];
+    propCopy.addEventListener('click', () => {
+      $hotkeysInfo.hidden = true;
+      $addPropInfo.hidden = true;
+      $copyPropInfo.hdden = false;
+      initCreateProp((ev) => {
+        const clone = {
+          ...prop,
+          x: ev.clientX,
+          y: ev.clientY,
+          id: getNextId(),
+        };
+        state.properties.push(clone);
+        saveState();
+      }, endDrag);
+    });
+
     const propType = [].filter.call(
       sidebarField.getElementsByTagName('select'),
       (el) => el.name === 'prop-type'
@@ -216,7 +247,15 @@ function loadState() {
 }
 
 $sheetImageUrl.addEventListener('change', setSheetImage);
-$addProp.addEventListener('click', initCreateProp);
+$addProp.addEventListener('click', () => {
+  $hotkeysInfo.hidden = true;
+  $addPropInfo.hidden = false;
+  $copyPropInfo.hidden = true;
+  initCreateProp(initDrag, () => {
+    endDrag();
+    createProp();
+  });
+});
 $copyHtml.addEventListener('click', copyHtml);
 $copyCss.addEventListener('click', copyCss);
 
@@ -248,11 +287,10 @@ async function setSheetImage() {
   reader.readAsDataURL(blob);
 }
 
-function initCreateProp() {
-  $sheet.addEventListener('mousedown', initDrag);
-  $sheet.addEventListener('mouseup', endDrag);
+function initCreateProp(onMouseDown, onMouseUp) {
+  $sheet.addEventListener('mousedown', onMouseDown);
+  $sheet.addEventListener('mouseup', onMouseUp);
   $sheet.style.cursor = 'crosshair';
-  $addPropInfo.hidden = false;
 }
 
 const dragBox = { x1: null, y1: null, x2: null, y2: null };
@@ -266,11 +304,8 @@ function initDrag(ev) {
 function drag(ev) {
   dragBox.x2 = ev.clientX;
   dragBox.y2 = ev.clientY;
-  const iframeRect = $iframe.getBoundingClientRect();
-  const bodyRect = document.body.getBoundingClientRect();
-  const offsetX = iframeRect.left - bodyRect.left;
-  const offsetY = iframeRect.top - bodyRect.top;
   const border = 2;
+  const [offsetX, offsetY] = getOffsets();
   const xMin = Math.min(dragBox.x1, dragBox.x2) + offsetX;
   const xMax = Math.max(dragBox.x1, dragBox.x2) + offsetX - 2 * border;
   const yMin = Math.min(dragBox.y1, dragBox.y2) + offsetY;
@@ -282,14 +317,23 @@ function drag(ev) {
   $drag.hidden = false;
 }
 
+const getOffsets = () => {
+  const iframeRect = $iframe.getBoundingClientRect();
+  const bodyRect = document.body.getBoundingClientRect();
+  const offsetX = iframeRect.left - bodyRect.left;
+  const offsetY = iframeRect.top - bodyRect.top;
+  return [offsetX, offsetY];
+};
+
 function endDrag() {
   $sheet.removeEventListener('mousedown', initDrag);
   $sheet.removeEventListener('mouseup', endDrag);
   $sheet.removeEventListener('mousemove', drag);
   $sheet.style.cursor = 'initial';
   $drag.hidden = true;
+  $hotkeysInfo.hidden = false;
   $addPropInfo.hidden = true;
-  createProp();
+  $copyPropInfo.hidden = true;
 }
 
 function createProp() {
@@ -302,10 +346,7 @@ function createProp() {
   const y = yMin;
   const w = xMax - xMin;
   const h = yMax - yMin;
-  const id = state.properties.length
-    ? state.properties.reduce((max, curr) => (max.id > curr.id ? max : curr))
-        .id + 1
-    : 0;
+  const id = getNextId();
   prop = {
     type: 'slt',
     name: null,
@@ -320,10 +361,17 @@ function createProp() {
   saveState();
 }
 
+function getNextId() {
+  return state.properties.length
+    ? state.properties.reduce((max, curr) => (max.id > curr.id ? max : curr))
+        .id + 1
+    : 0;
+}
+
 function copyHtml() {
-  navigator.clipboard.writeText($sheet.outerHTML);
+  return navigator.clipboard.writeText($sheet.outerHTML);
 }
 
 function copyCss() {
-  navigator.clipboard.writeText($sheetStyle.innerHTML);
+  return navigator.clipboard.writeText($sheetStyle.innerHTML);
 }
