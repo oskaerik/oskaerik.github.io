@@ -137,8 +137,6 @@ function loadState() {
   for (const key in json) if (allowedKeys.has(key)) state[key] = json[key];
   console.log('Loaded state from JSON:', state);
 
-  $sheet.setAttribute('data-sheetmagic-url', window.location.href);
-
   $sheetImageUrl.value = state.imageUrl || '';
   $sheetImageUrl.dispatchEvent(new Event('change'));
 
