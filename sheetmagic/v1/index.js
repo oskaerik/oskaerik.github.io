@@ -296,6 +296,10 @@ function createProp() {
   const y = yMin;
   const w = xMax - xMin;
   const h = yMax - yMin;
+  const id = state.properties.length
+    ? state.properties.reduce((max, curr) => (max.id > curr.id ? max : curr))
+        .id + 1
+    : 0;
   prop = {
     type: 'slt',
     name: null,
@@ -304,9 +308,7 @@ function createProp() {
     y: y,
     w: w,
     h: h,
-    id: state.properties.length
-      ? state.properties[state.properties.length - 1].id + 1
-      : 0,
+    id: id,
   };
   state.properties.push(prop);
   saveState();
