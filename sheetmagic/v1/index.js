@@ -124,7 +124,7 @@ function loadState() {
 
   $sheet.setAttribute('data-sheetmagic-url', window.location.href);
 
-  $sheetImageUrl.value = getImageUrl() || '';
+  $sheetImageUrl.value = state.imageUrl || '';
   $sheetImageUrl.dispatchEvent(new Event('change'));
 
   state.properties.forEach((prop) => {
@@ -212,15 +212,6 @@ function loadState() {
   });
 }
 
-function setImageUrl(imageUrl) {
-  state.imageUrl = imageUrl;
-  saveState();
-}
-
-function getImageUrl() {
-  return state.imageUrl;
-}
-
 $sheetImageUrl.addEventListener('change', setSheetImage);
 $addProp.addEventListener('click', initCreateProp);
 $copyHtml.addEventListener('click', copyHtml);
@@ -229,7 +220,9 @@ $copyCss.addEventListener('click', copyCss);
 async function setSheetImage() {
   const imageUrl = $sheetImageUrl.value;
   if (!imageUrl) return;
-  setImageUrl(imageUrl);
+  state.imageUrl = imageUrl;
+  saveState();
+
   const response = await fetch(imageUrl);
   const blob = await response.blob();
   const reader = new FileReader();
