@@ -19,6 +19,11 @@ const PROP_TYPES = {
     type: 'roll',
     classList: ['sm-prop', 'sm-roll'],
   },
+  checkbox: {
+    tag: 'input',
+    type: 'checkbox',
+    classList: ['sm-prop', 'sm-checkbox'],
+  },
 };
 
 const $iframe = document.getElementById('iframe');
@@ -158,7 +163,7 @@ function loadState() {
     )[0];
     propName.value = prop.name || '';
     propName.addEventListener('change', () => {
-      prop.name = propName.value.toLowerCase().replace(/[^a-z]/g, '');
+      prop.name = propName.value.toLowerCase().replace(/[^a-z0-9]/g, '');
       propName.value = prop.name;
       saveState();
     });
@@ -185,6 +190,7 @@ function loadState() {
       el.name = `roll_${propName.value}`;
       el.value = propValue.value;
     } else {
+      if (prop.type === 'checkbox') el.value = '1';
       el.name = `attr_${propName.value}`;
     }
     el.setAttribute('data-sm-id', prop.id);
