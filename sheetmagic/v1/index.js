@@ -52,6 +52,9 @@ const allowedKeys = new Set(['imageUrl', 'properties']);
 
 function init() {
   $sheet = $iframe.contentDocument.getElementsByClassName('sheetmagic')[0];
+  $iframe.contentDocument.addEventListener('keydown', (ev) => {
+    if (ev.key === 'a') $addProp.click();
+  });
   $sheetStyle = document.createElement('style');
   $iframe.contentDocument
     .getElementsByTagName('head')[0]
