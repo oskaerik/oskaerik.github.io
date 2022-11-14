@@ -122,16 +122,17 @@ button[type='roll']::before {
 }
 
 function saveState() {
-  const queryString = new URLSearchParams({
-    json: JSON.stringify(state),
-  }).toString();
-  if (window.location.search !== `?${queryString}`)
-    window.location.search = queryString;
+  const hash = encodeURIComponent(JSON.stringify(state));
+  if (window.location.hash !== `#${hash}`) {
+    window.location.hash = hash;
+    location.reload();
+  }
 }
 
 function loadState() {
-  const queryString = new URLSearchParams(window.location.search);
-  json = JSON.parse(queryString.get('json'));
+  const hash = window.location.hash.substring(1);
+  if (!hash) return;
+  json = JSON.parse(decodeURIComponent(hash));
   if (!json) return;
   for (const key in json) if (allowedKeys.has(key)) state[key] = json[key];
   console.log('Loaded state from JSON:', state);
