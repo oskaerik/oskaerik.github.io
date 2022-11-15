@@ -1,0 +1,39 @@
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+h1 {
+  margin: 0;
+  padding: 10px 0;
+  text-align: center;
+}
+
+input[name='prop-value'] {
+  width: 100%;
+}
+
+#iframe {
+  float: left;
+  margin-right: 20px;
+}
+
+#sidebar {
+  float: left;
+  min-width: 500px;
+}
+
+.sidebar-field {
+  margin-bottom: 20px;
+}
+
+#sheet-image-url {
+  width: 100%;
+}
+
+#drag {
+  position: absolute;
+  border: 2px solid black;
+  background-color: rgba(0, 0, 0, 0.1);
+}
