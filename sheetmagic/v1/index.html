@@ -8,7 +8,7 @@
   </head>
   <body>
     <h1>SheetMagic - Roll20 Character Sheet Creator</h1>
-    <iframe id="iframe" width="0" height="0" frameborder="0"></iframe>
+    <iframe id="iframe" width="0" height="0" frameborder="1"></iframe>
     <div id="sidebar">
       <div id="sidebar-field-copy" class="sidebar-field" hidden>
         <button id="copy-html" title="Copy the sheet's HTML to clipboard">
@@ -47,18 +47,15 @@
             <option value="num">Number</option>
             <option value="roll">Roll</option>
             <option value="checkbox">Checkbox</option>
+            <option value="noedit">Non-editable text</option>
           </select>
           <input
             name="prop-name"
             type="text"
             placeholder="Name, must be unique"
-          />
-          <input
-            name="prop-value"
-            type="text"
-            placeholder="Value, example: /roll 1d20 + @{strength}"
             hidden
           />
+          <input name="prop-value" type="text" hidden />
           <code name="prop-json" hidden></code>
         </div>
       </template>
