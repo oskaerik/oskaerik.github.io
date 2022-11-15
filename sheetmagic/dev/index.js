@@ -24,6 +24,11 @@ const PROP_TYPES = {
     type: 'checkbox',
     classList: ['sm-prop', 'sm-checkbox'],
   },
+  noedit: {
+    tag: 'span',
+    type: null,
+    classList: ['sm-prop', 'sm-noedit'],
+  },
 };
 
 const $iframe = document.getElementById('iframe');
@@ -198,6 +203,7 @@ function loadState() {
       sidebarField.getElementsByTagName('input'),
       (el) => el.name === 'prop-name'
     )[0];
+    if (prop.type !== 'noedit') propName.hidden = false;
     propName.value = prop.name || '';
     propName.addEventListener('change', () => {
       prop.name = propName.value.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -209,7 +215,13 @@ function loadState() {
       sidebarField.getElementsByTagName('input'),
       (el) => el.name === 'prop-value'
     )[0];
-    if (prop.type === 'roll') propValue.hidden = false;
+    if (prop.type === 'roll' || prop.type === 'noedit') {
+      propValue.placeholder =
+        prop.type === 'roll'
+          ? 'Value, example: /roll 1d20 + @{strength}'
+          : 'Any text can be written here';
+      propValue.hidden = false;
+    }
     propValue.value = prop.value || '';
     propValue.addEventListener('change', () => {
       prop.value = propValue.value;
@@ -226,6 +238,8 @@ function loadState() {
     if (prop.type === 'roll') {
       el.name = `roll_${propName.value}`;
       el.value = propValue.value;
+    } else if (prop.type === 'noedit') {
+      el.textContent = propValue.value;
     } else {
       if (prop.type === 'checkbox') el.value = '1';
       el.name = `attr_${propName.value}`;
@@ -237,7 +251,6 @@ function loadState() {
     el.style.top = `${prop.y}px`;
     el.style.width = `${prop.w}px`;
     el.style.height = `${prop.h}px`;
-    el.style.position = 'absolute';
     if (prop.type === 'num' || prop.type === 'slt')
       el.style.fontSize = `${Math.round(0.6 * prop.h)}px`;
     $sheet.appendChild(el);
