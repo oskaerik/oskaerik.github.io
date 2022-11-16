@@ -34,6 +34,5 @@ input[name='prop-value'] {
 
 #drag {
   position: absolute;
-  border: 2px solid black;
   background-color: rgba(0, 0, 0, 0.1);
 }
