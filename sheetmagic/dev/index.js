@@ -107,7 +107,15 @@ function init() {
 
 .sm-checkbox {
   margin: 0;
+  cursor: pointer;
+  appearance: none;
+  border: none;
 }
+
+.sm-checkbox:checked {
+  appearance: auto;
+}
+
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -316,12 +324,11 @@ function initDrag(ev) {
 function drag(ev) {
   dragBox.x2 = ev.clientX;
   dragBox.y2 = ev.clientY;
-  const border = 2;
   const [offsetX, offsetY] = getOffsets();
   const xMin = Math.min(dragBox.x1, dragBox.x2) + offsetX;
-  const xMax = Math.max(dragBox.x1, dragBox.x2) + offsetX - 2 * border;
+  const xMax = Math.max(dragBox.x1, dragBox.x2) + offsetX;
   const yMin = Math.min(dragBox.y1, dragBox.y2) + offsetY;
-  const yMax = Math.max(dragBox.y1, dragBox.y2) + offsetY - 2 * border;
+  const yMax = Math.max(dragBox.y1, dragBox.y2) + offsetY;
   $drag.style.left = `${xMin}px`;
   $drag.style.top = `${yMin}px`;
   $drag.style.width = `${xMax - xMin}px`;
