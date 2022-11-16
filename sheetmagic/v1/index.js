@@ -158,6 +158,34 @@ function loadState() {
   state.properties.forEach((prop) => {
     const sidebarField = $template.content.firstElementChild.cloneNode(true);
 
+    const propMoveDown = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-move-down'
+    )[0];
+    propMoveDown.addEventListener('click', () => {
+      const i = state.properties.findIndex((el) => el.id === prop.id);
+      if (i !== -1 && i < state.properties.length - 1) {
+        const el = state.properties[i];
+        state.properties[i] = state.properties[i + 1];
+        state.properties[i + 1] = el;
+      }
+      saveState();
+    });
+
+    const propMoveUp = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-move-up'
+    )[0];
+    propMoveUp.addEventListener('click', () => {
+      const i = state.properties.findIndex((el) => el.id === prop.id);
+      if (i > 0) {
+        const el = state.properties[i];
+        state.properties[i] = state.properties[i - 1];
+        state.properties[i - 1] = el;
+      }
+      saveState();
+    });
+
     const propDelete = [].filter.call(
       sidebarField.getElementsByTagName('button'),
       (el) => el.name === 'prop-delete'
@@ -206,6 +234,7 @@ function loadState() {
     propType.value = prop.type;
     propType.addEventListener('change', () => {
       prop.type = propType.value;
+      prop.value = null;
       saveState();
     });
 
