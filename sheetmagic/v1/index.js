@@ -97,6 +97,7 @@ function init() {
 
 .sm-mlt {
   font-size: 16px;
+  resize: none;
 }
 
 .sm-num {
