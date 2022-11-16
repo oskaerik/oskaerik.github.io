@@ -82,6 +82,8 @@ function init() {
 }
 
 .sm-prop {
+  margin: 0;
+  padding: 0;
   position: absolute;
   background: transparent !important;
   box-shadow: none;
@@ -106,7 +108,6 @@ function init() {
 }
 
 .sm-checkbox {
-  margin: 0;
   cursor: pointer;
   appearance: none;
   border: none;
