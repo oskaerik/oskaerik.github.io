@@ -214,7 +214,7 @@ function loadState() {
     propCopy.addEventListener('click', () => {
       $hotkeysInfo.hidden = true;
       $addPropInfo.hidden = true;
-      $copyPropInfo.hdden = false;
+      $copyPropInfo.hidden = false;
       initCreateProp((ev) => {
         const clone = {
           ...prop,
