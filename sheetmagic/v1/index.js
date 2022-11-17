@@ -75,6 +75,7 @@ function init() {
 .sheetmagic {
   position: relative;
   margin: auto;
+  font-family: sans-serif;
 }
 
 .sm-prop {
@@ -83,7 +84,7 @@ function init() {
   position: absolute;
   background: transparent !important;
   box-shadow: none;
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   color: black;
 }
 
@@ -107,11 +108,14 @@ function init() {
 .sm-checkbox {
   cursor: pointer;
   appearance: none;
-  border: none;
 }
 
 .sm-checkbox:checked {
   appearance: auto;
+}
+
+.sm-noedit {
+  border: none;
 }
 
 
@@ -265,6 +269,7 @@ function loadState() {
     el.style.height = `${prop.h}px`;
     if (prop.type === 'num' || prop.type === 'slt')
       el.style.fontSize = `${Math.round(0.6 * prop.h)}px`;
+    else if (prop.type === 'noedit') el.style.fontSize = `${prop.h}px`;
     $sheet.appendChild(el);
     el.focus();
   });
@@ -278,6 +283,8 @@ $addProp.addEventListener('click', () => {
   $hotkeysInfo.hidden = true;
   $addPropInfo.hidden = false;
   $copyPropInfo.hidden = true;
+  $addProp.disabled = true;
+  $copySelected.disabled = true;
   initCreateProp(initDrag, () => {
     endDrag();
     createProp();
@@ -297,6 +304,8 @@ $copySelected.addEventListener('click', () => {
   $hotkeysInfo.hidden = true;
   $addPropInfo.hidden = true;
   $copyPropInfo.hidden = false;
+  $addProp.disabled = true;
+  $copySelected.disabled = true;
   initCreateProp((ev) => {
     const xDiff = ev.clientX - selectedProps[0].x;
     const yDiff = ev.clientY - selectedProps[0].y;
@@ -402,6 +411,8 @@ function endDrag() {
   $hotkeysInfo.hidden = false;
   $addPropInfo.hidden = true;
   $copyPropInfo.hidden = true;
+  $addProp.disabled = false;
+  $copySelected.disabled = false;
 }
 
 function createProp() {
