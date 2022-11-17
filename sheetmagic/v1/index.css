@@ -21,11 +21,35 @@ input[name='prop-value'] {
 
 #sidebar {
   float: left;
-  min-width: 500px;
+  width: 500px;
 }
 
 .sidebar-field {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  padding: 5px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-field select,
+.sidebar-field input {
+  width: 45%;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-field input[type='checkbox'] {
+  width: auto;
+}
+
+.sidebar-field input[name='prop-value'] {
+  width: 90%;
+}
+
+#sidebar-field-copy,
+#sidebar-field-image-url,
+#sidebar-field-add-prop,
+#sidebar-field-copy-delete {
+  background: none;
 }
 
 #sheet-image-url {

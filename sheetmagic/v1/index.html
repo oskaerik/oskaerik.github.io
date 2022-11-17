@@ -18,7 +18,7 @@
           Copy CSS
         </button>
       </div>
-      <div class="sidebar-field">
+      <div id="sidebar-field-image-url" class="sidebar-field">
         <label for="sheet-image-url">
           Sheet image URL (max recommended width is 1000px):
         </label>
@@ -26,23 +26,24 @@
       </div>
       <div id="sidebar-field-add-prop" class="sidebar-field" hidden>
         <button id="add-prop">Add property</button>
-        <span id="hotkeys-info">
-          Hotkeys: a - Add property, c - Copy last property
-        </span>
+        <br />
+        <span id="hotkeys-info"> Shortcut: Shift + A </span>
         <span id="add-prop-info" hidden>
           Click and drag to place a new property on the sheet
         </span>
         <span id="copy-prop-info" hidden>
-          Click on the sheet to place a copy of the element
+          Click on the sheet where you want to place the copy of the first
+          selected property in the list (if you selected multiple properties,
+          the others will be placed relative to the first property)
         </span>
+      </div>
+      <div id="sidebar-field-copy-delete" class="sidebar-field" hidden>
+        <button id="copy-selected">Copy selected</button>
+        <button id="delete-selected">Delete selected</button>
       </div>
       <template id="template">
         <div class="sidebar-field">
-          <button name="prop-move-down">↓</button>
-          <button name="prop-move-up">↑</button>
-          <button name="prop-delete">×</button>
-          <button name="prop-highlight">Highlight</button>
-          <button name="prop-copy">Copy</button>
+          <input name="prop-select" type="checkbox" />
           <select name="prop-type">
             <option value="slt">Single-line text</option>
             <option value="mlt">Multi-line text</option>
@@ -57,7 +58,12 @@
             placeholder="Name, must be unique"
             hidden
           />
+          <br />
           <input name="prop-value" type="text" hidden />
+          <br />
+          <button name="prop-move-down">↓</button>
+          <button name="prop-move-up">↑</button>
+          <button name="prop-highlight">Highlight</button>
           <code name="prop-json" hidden></code>
         </div>
       </template>

@@ -42,6 +42,11 @@ const $addProp = document.getElementById('add-prop');
 const $hotkeysInfo = document.getElementById('hotkeys-info');
 const $addPropInfo = document.getElementById('add-prop-info');
 const $copyPropInfo = document.getElementById('copy-prop-info');
+const $sidebarFieldCopyDelete = document.getElementById(
+  'sidebar-field-copy-delete'
+);
+const $copySelected = document.getElementById('copy-selected');
+const $deleteSelected = document.getElementById('delete-selected');
 const $template = document.getElementById('template');
 const $drag = document.getElementById('drag');
 let $sheet = null;
@@ -60,16 +65,7 @@ const allowedKeys = new Set(['imageUrl', 'properties']);
 function init() {
   $sheet = $iframe.contentDocument.getElementsByClassName('sheetmagic')[0];
   $iframe.contentDocument.addEventListener('keydown', (ev) => {
-    if (ev.key === 'a') $addProp.click();
-  });
-  $iframe.contentDocument.addEventListener('keydown', (ev) => {
-    if (ev.key === 'c') {
-      const copyButtons = [].filter.call(
-        $sidebar.getElementsByTagName('button'),
-        (el) => el.name === 'prop-copy'
-      );
-      if (copyButtons.length > 0) copyButtons[copyButtons.length - 1].click();
-    }
+    if (ev.key === 'A') $addProp.click();
   });
   $sheetStyle = document.createElement('style');
   $iframe.contentDocument
@@ -141,7 +137,9 @@ function saveState() {
   if (window.location.hash !== `#${hash}`) {
     window.location.hash = hash;
     location.reload();
+    return true;
   }
+  return false;
 }
 
 function loadState() {
@@ -158,74 +156,11 @@ function loadState() {
   state.properties.forEach((prop) => {
     const sidebarField = $template.content.firstElementChild.cloneNode(true);
 
-    const propMoveDown = [].filter.call(
-      sidebarField.getElementsByTagName('button'),
-      (el) => el.name === 'prop-move-down'
+    const propSelect = [].filter.call(
+      sidebarField.getElementsByTagName('input'),
+      (el) => el.name === 'prop-select'
     )[0];
-    propMoveDown.addEventListener('click', () => {
-      const i = state.properties.findIndex((el) => el.id === prop.id);
-      if (i !== -1 && i < state.properties.length - 1) {
-        const el = state.properties[i];
-        state.properties[i] = state.properties[i + 1];
-        state.properties[i + 1] = el;
-      }
-      saveState();
-    });
-
-    const propMoveUp = [].filter.call(
-      sidebarField.getElementsByTagName('button'),
-      (el) => el.name === 'prop-move-up'
-    )[0];
-    propMoveUp.addEventListener('click', () => {
-      const i = state.properties.findIndex((el) => el.id === prop.id);
-      if (i > 0) {
-        const el = state.properties[i];
-        state.properties[i] = state.properties[i - 1];
-        state.properties[i - 1] = el;
-      }
-      saveState();
-    });
-
-    const propDelete = [].filter.call(
-      sidebarField.getElementsByTagName('button'),
-      (el) => el.name === 'prop-delete'
-    )[0];
-    propDelete.addEventListener('click', () => {
-      state.properties = state.properties.filter((el) => el.id !== prop.id);
-      saveState();
-    });
-
-    const propHighlight = [].filter.call(
-      sidebarField.getElementsByTagName('button'),
-      (el) => el.name === 'prop-highlight'
-    )[0];
-    propHighlight.addEventListener('click', () => {
-      const el = [].filter.call(
-        $sheet.getElementsByTagName('*'),
-        (el) => parseInt(el.getAttribute('data-sm-id')) === prop.id
-      )[0];
-      el.focus();
-    });
-
-    const propCopy = [].filter.call(
-      sidebarField.getElementsByTagName('button'),
-      (el) => el.name === 'prop-copy'
-    )[0];
-    propCopy.addEventListener('click', () => {
-      $hotkeysInfo.hidden = true;
-      $addPropInfo.hidden = true;
-      $copyPropInfo.hidden = false;
-      initCreateProp((ev) => {
-        const clone = {
-          ...prop,
-          x: ev.clientX,
-          y: ev.clientY,
-          id: getNextId(),
-        };
-        state.properties.push(clone);
-        saveState();
-      }, endDrag);
-    });
+    propSelect.setAttribute('data-sm-id', prop.id);
 
     const propType = [].filter.call(
       sidebarField.getElementsByTagName('select'),
@@ -267,6 +202,44 @@ function loadState() {
       saveState();
     });
 
+    const propMoveDown = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-move-down'
+    )[0];
+    propMoveDown.addEventListener('click', () => {
+      const ind = state.properties.findIndex((x) => x.id === prop.id);
+      if (ind !== -1 && ind < state.properties.length - 1) {
+        state.properties[ind] = state.properties[ind + 1];
+        state.properties[ind + 1] = prop;
+      }
+      saveState();
+    });
+
+    const propMoveUp = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-move-up'
+    )[0];
+    propMoveUp.addEventListener('click', () => {
+      const ind = state.properties.findIndex((x) => x.id === prop.id);
+      if (ind > 0) {
+        state.properties[ind] = state.properties[ind - 1];
+        state.properties[ind - 1] = prop;
+      }
+      saveState();
+    });
+
+    const propHighlight = [].filter.call(
+      sidebarField.getElementsByTagName('button'),
+      (el) => el.name === 'prop-highlight'
+    )[0];
+    propHighlight.addEventListener('click', () => {
+      const el = [].filter.call(
+        $sheet.getElementsByTagName('*'),
+        (el) => parseInt(el.getAttribute('data-sm-id')) === prop.id
+      )[0];
+      el.focus();
+    });
+
     const propJson = sidebarField.getElementsByTagName('code')[0];
     propJson.textContent = JSON.stringify(prop);
 
@@ -298,6 +271,9 @@ function loadState() {
 }
 
 $sheetImageUrl.addEventListener('change', setSheetImage);
+$copyHtml.addEventListener('click', copyHtml);
+$copyCss.addEventListener('click', copyCss);
+
 $addProp.addEventListener('click', () => {
   $hotkeysInfo.hidden = true;
   $addPropInfo.hidden = false;
@@ -307,16 +283,57 @@ $addProp.addEventListener('click', () => {
     createProp();
   });
 });
-$copyHtml.addEventListener('click', copyHtml);
-$copyCss.addEventListener('click', copyCss);
+
+$copySelected.addEventListener('click', () => {
+  const checkboxes = [].filter.call(
+    $sidebar.getElementsByTagName('input'),
+    (el) => el.name === 'prop-select' && el.checked
+  );
+  const selectedProps = checkboxes.map(
+    (checkbox) =>
+      state.properties[parseInt(checkbox.getAttribute('data-sm-id'))]
+  );
+  if (!selectedProps.length) return;
+  $hotkeysInfo.hidden = true;
+  $addPropInfo.hidden = true;
+  $copyPropInfo.hidden = false;
+  initCreateProp((ev) => {
+    const xDiff = ev.clientX - selectedProps[0].x;
+    const yDiff = ev.clientY - selectedProps[0].y;
+    copyProperties(selectedProps, xDiff, yDiff);
+  }, endDrag);
+});
+
+$deleteSelected.addEventListener('click', () => {
+  const checkboxes = [].filter.call(
+    $sidebar.getElementsByTagName('input'),
+    (el) => el.name === 'prop-select' && el.checked
+  );
+  const selectedIds = new Set(
+    checkboxes.map((checkbox) => parseInt(checkbox.getAttribute('data-sm-id')))
+  );
+  state.properties = state.properties.filter(
+    (prop) => !selectedIds.has(prop.id)
+  );
+  saveState();
+});
 
 async function setSheetImage() {
   const imageUrl = $sheetImageUrl.value;
   if (!imageUrl) return;
   state.imageUrl = imageUrl;
-  saveState();
+  const reloading = saveState();
+  if (reloading) return;
 
-  const response = await fetch(imageUrl);
+  let response = null;
+  try {
+    response = await fetch(imageUrl);
+  } catch (e) {
+    alert(
+      `Failed to get image: ${imageUrl}\n\nRefresh the page, otherwise try uploading it to e.g. https://imgbb.com/ instead.`
+    );
+    return;
+  }
   const blob = await response.blob();
   const reader = new FileReader();
   reader.onload = function () {
@@ -332,6 +349,7 @@ async function setSheetImage() {
       $sheetImageUrl.disabled = true;
       $sidebarFieldCopy.hidden = false;
       $sidebarFieldAddProp.hidden = false;
+      $sidebarFieldCopyDelete.hidden = false;
     };
     image.src = this.result;
   };
@@ -399,7 +417,7 @@ function createProp() {
   const id = getNextId();
   prop = {
     type: 'slt',
-    name: null,
+    name: `prop${id}`,
     value: null,
     x: x,
     y: y,
@@ -411,6 +429,21 @@ function createProp() {
   saveState();
 }
 
+function copyProperties(selectedProps, xDiff, yDiff) {
+  selectedProps.forEach((prop) => {
+    const id = getNextId();
+    const clone = {
+      ...prop,
+      name: `prop${id}`,
+      x: prop.x + xDiff,
+      y: prop.y + yDiff,
+      id: id,
+    };
+    state.properties.push(clone);
+  });
+  saveState();
+}
+
 function getNextId() {
   return state.properties.length
     ? state.properties.reduce((max, curr) => (max.id > curr.id ? max : curr))
@@ -419,9 +452,11 @@ function getNextId() {
 }
 
 function copyHtml() {
+  alert('HTML copied to clipboard');
   return navigator.clipboard.writeText($sheet.outerHTML);
 }
 
 function copyCss() {
+  alert('CSS copied to clipboard');
   return navigator.clipboard.writeText($sheetStyle.innerHTML);
 }
