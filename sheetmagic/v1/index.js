@@ -488,8 +488,8 @@ function updateSheetStyle() {
 }
 
 .sm-prop {
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   position: absolute;
   background: transparent !important;
   box-shadow: none;
