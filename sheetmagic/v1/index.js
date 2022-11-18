@@ -24,6 +24,11 @@ const PROP_TYPES = {
     type: 'checkbox',
     classList: ['sm-prop', 'sm-checkbox'],
   },
+  autocalc: {
+    tag: 'input',
+    type: 'number',
+    classList: ['sm-prop', 'sm-num'],
+  },
   noedit: {
     tag: 'span',
     type: null,
@@ -46,6 +51,7 @@ const $sidebarFieldCopyDelete = document.getElementById(
   'sidebar-field-copy-delete'
 );
 const $copySelected = document.getElementById('copy-selected');
+const $renameSelected = document.getElementById('rename-selected');
 const $deleteSelected = document.getElementById('delete-selected');
 const $template = document.getElementById('template');
 const $drag = document.getElementById('drag');
@@ -193,11 +199,22 @@ function loadState() {
       sidebarField.getElementsByTagName('input'),
       (el) => el.name === 'prop-value'
     )[0];
-    if (prop.type === 'roll' || prop.type === 'noedit') {
-      propValue.placeholder =
-        prop.type === 'roll'
-          ? 'Value, example: /roll 1d20 + @{strength}'
-          : 'Any text can be written here';
+    let placeholder = null;
+    switch (prop.type) {
+      case 'roll':
+        placeholder = 'Example: /roll 1d20 + @{strength}';
+        break;
+      case 'autocalc':
+        placeholder = 'Example: (floor(@{strength} / 2))';
+        break;
+      case 'noedit':
+        placeholder = 'Any text can be written here';
+        break;
+      default:
+        break;
+    }
+    if (placeholder !== null) {
+      propValue.placeholder = placeholder;
       propValue.hidden = false;
     }
     propValue.value = prop.value || '';
@@ -251,14 +268,26 @@ function loadState() {
 
     const { tag, type, classList } = PROP_TYPES[prop.type];
     const el = document.createElement(tag);
-    if (prop.type === 'roll') {
-      el.name = `roll_${propName.value}`;
-      el.value = propValue.value;
-    } else if (prop.type === 'noedit') {
-      el.textContent = propValue.value;
-    } else {
-      if (prop.type === 'checkbox') el.value = '1';
-      el.name = `attr_${propName.value}`;
+    switch (prop.type) {
+      case 'roll':
+        el.name = `roll_${propName.value}`;
+        el.value = propValue.value;
+        break;
+      case 'autocalc':
+        el.name = `attr_${propName.value}`;
+        el.setAttribute('value', propValue.value);
+        el.setAttribute('disabled', 'true');
+        break;
+      case 'noedit':
+        el.textContent = propValue.value;
+        break;
+      case 'checkbox':
+        el.name = `attr_${propName.value}`;
+        el.value = '1';
+        break;
+      default:
+        el.name = `attr_${propName.value}`;
+        break;
     }
     el.setAttribute('data-sm-id', prop.id);
     el.type = type;
@@ -285,6 +314,8 @@ $addProp.addEventListener('click', () => {
   $copyPropInfo.hidden = true;
   $addProp.disabled = true;
   $copySelected.disabled = true;
+  $renameSelected.disabled = true;
+  $deleteSelected.disabled = true;
   initCreateProp(initDrag, () => {
     endDrag();
     createProp();
@@ -298,7 +329,9 @@ $copySelected.addEventListener('click', () => {
   );
   const selectedProps = checkboxes.map(
     (checkbox) =>
-      state.properties[parseInt(checkbox.getAttribute('data-sm-id'))]
+      state.properties.filter(
+        (prop) => prop.id === parseInt(checkbox.getAttribute('data-sm-id'))
+      )[0]
   );
   if (!selectedProps.length) return;
   $hotkeysInfo.hidden = true;
@@ -306,11 +339,34 @@ $copySelected.addEventListener('click', () => {
   $copyPropInfo.hidden = false;
   $addProp.disabled = true;
   $copySelected.disabled = true;
+  $renameSelected.disabled = true;
+  $deleteSelected.disabled = true;
   initCreateProp((ev) => {
     const xDiff = ev.clientX - selectedProps[0].x;
     const yDiff = ev.clientY - selectedProps[0].y;
     copyProperties(selectedProps, xDiff, yDiff);
   }, endDrag);
+});
+
+$renameSelected.addEventListener('click', () => {
+  const checkboxes = [].filter.call(
+    $sidebar.getElementsByTagName('input'),
+    (el) => el.name === 'prop-select' && el.checked
+  );
+  const selectedProps = checkboxes.map(
+    (checkbox) =>
+      state.properties.filter(
+        (prop) => prop.id === parseInt(checkbox.getAttribute('data-sm-id'))
+      )[0]
+  );
+  if (!selectedProps.length) return;
+  const newName = prompt(
+    `Renaming ${selectedProps.length} properties, they will be renamed to: name1, name2, ...\nEnter new name:`,
+    'renamed'
+  );
+  if (newName == null || newName == '') return;
+  selectedProps.forEach((prop, ind) => (prop.name = `${newName}${ind + 1}`));
+  saveState();
 });
 
 $deleteSelected.addEventListener('click', () => {
@@ -413,6 +469,8 @@ function endDrag() {
   $copyPropInfo.hidden = true;
   $addProp.disabled = false;
   $copySelected.disabled = false;
+  $renameSelected.disabled = false;
+  $deleteSelected.disabled = false;
 }
 
 function createProp() {
@@ -459,7 +517,7 @@ function getNextId() {
   return state.properties.length
     ? state.properties.reduce((max, curr) => (max.id > curr.id ? max : curr))
         .id + 1
-    : 0;
+    : 1;
 }
 
 function copyHtml() {
