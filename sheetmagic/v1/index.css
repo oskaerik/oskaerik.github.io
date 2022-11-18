@@ -45,6 +45,10 @@ input[name='prop-value'] {
   width: 95%;
 }
 
+.sidebar-field input[type='color'] {
+  width: 5ch;
+}
+
 #sidebar-field-copy,
 #sidebar-field-image-url,
 #sidebar-field-add-prop,

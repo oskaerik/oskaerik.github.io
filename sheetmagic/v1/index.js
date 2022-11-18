@@ -43,6 +43,7 @@ const $copyHtml = document.getElementById('copy-html');
 const $copyCss = document.getElementById('copy-css');
 const $sheetImageUrl = document.getElementById('sheet-image-url');
 const $sidebarFieldAddProp = document.getElementById('sidebar-field-add-prop');
+const $colorPicker = document.getElementById('color-picker');
 const $addProp = document.getElementById('add-prop');
 const $hotkeysInfo = document.getElementById('hotkeys-info');
 const $addPropInfo = document.getElementById('add-prop-info');
@@ -66,7 +67,7 @@ $iframe.srcdoc =
   "<html><head></head><body style='margin: 0;'><div class='sheetmagic'></div><script>window.parent.postMessage('loaded', '*');</script></body></html>";
 
 const state = { properties: [] };
-const allowedKeys = new Set(['imageUrl', 'properties']);
+const allowedKeys = new Set(['imageUrl', 'properties', 'fontColor']);
 
 function init() {
   $sheet = $iframe.contentDocument.getElementsByClassName('sheetmagic')[0];
@@ -77,68 +78,10 @@ function init() {
   $iframe.contentDocument
     .getElementsByTagName('head')[0]
     .appendChild($sheetStyle);
-  $sheetStyle.innerHTML = `\
-.sheetmagic {
-  position: relative;
-  margin: auto;
-  font-family: sans-serif;
-}
-
-.sm-prop {
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  background: transparent !important;
-  box-shadow: none;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  color: black;
-}
-
-.sm-prop:focus {
-  background: rgba(0, 0, 0, 0.1) !important;
-}
-
-.sm-mlt {
-  font-size: 16px;
-  resize: none;
-}
-
-.sm-num {
-  text-align: center;
-}
-
-.sm-roll {
-  cursor: pointer;
-}
-
-.sm-checkbox {
-  cursor: pointer;
-  appearance: none;
-}
-
-.sm-checkbox:checked {
-  appearance: auto;
-}
-
-.sm-noedit {
-  border: none;
-}
-
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='number'] {
-  -moz-appearance: textfield;
-}
-
-button[type='roll']::before {
-  content: '' !important;
-}
-`;
+  $colorPicker.addEventListener('change', () => {
+    state.fontColor = $colorPicker.value;
+    saveState();
+  });
   loadState();
 }
 
@@ -302,6 +245,8 @@ function loadState() {
     $sheet.appendChild(el);
     el.focus();
   });
+  $colorPicker.value = state.fontColor || '#000000';
+  updateSheetStyle();
 }
 
 $sheetImageUrl.addEventListener('change', setSheetImage);
@@ -528,4 +473,73 @@ function copyHtml() {
 function copyCss() {
   alert('CSS copied to clipboard');
   return navigator.clipboard.writeText($sheetStyle.innerHTML);
+}
+
+function updateSheetStyle() {
+  $sheetStyle.innerHTML = `\
+.sheetmagic {
+  position: relative;
+  margin: auto;
+  font-family: sans-serif;
+}
+
+.sheetmagic * {
+  color: ${state.fontColor || $colorPicker.value} !important;
+}
+
+.sm-prop {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  background: transparent !important;
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: black;
+}
+
+.sm-prop:focus {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.sm-mlt {
+  font-size: 16px;
+  resize: none;
+}
+
+.sm-num {
+  text-align: center;
+}
+
+.sm-roll {
+  cursor: pointer;
+}
+
+.sm-checkbox {
+  cursor: pointer;
+  appearance: none;
+}
+
+.sm-checkbox:checked {
+  appearance: auto;
+}
+
+.sm-noedit {
+  border: none;
+}
+
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+button[type='roll']::before {
+  content: '' !important;
+}
+`;
 }
