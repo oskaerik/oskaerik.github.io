@@ -546,7 +546,5 @@ button[type='roll']::before {
 }
 
 function countVisit() {
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', 'https://api.countapi.xyz/hit/oskaerik.github.io/visits');
-  xhr.send();
+  fetch('https://api.countapi.xyz/hit/oskaerik.github.io/visits');
 }
