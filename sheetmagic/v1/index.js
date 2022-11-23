@@ -134,7 +134,7 @@ function loadState() {
     if (prop.type !== 'noedit') propName.hidden = false;
     propName.value = prop.name || '';
     propName.addEventListener('change', () => {
-      prop.name = propName.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+      prop.name = propName.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
       propName.value = prop.name;
       saveState();
     });
