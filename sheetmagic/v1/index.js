@@ -39,8 +39,8 @@ const PROP_TYPES = {
 const $iframe = document.getElementById('iframe');
 const $sidebar = document.getElementById('sidebar');
 const $sidebarFieldCopy = document.getElementById('sidebar-field-copy');
-const $copyHtml = document.getElementById('copy-html');
-const $copyCss = document.getElementById('copy-css');
+const $downloadHtml = document.getElementById('download-html');
+const $downloadCss = document.getElementById('download-css');
 const $sheetImageUrl = document.getElementById('sheet-image-url');
 const $sidebarFieldAddProp = document.getElementById('sidebar-field-add-prop');
 const $colorPicker = document.getElementById('color-picker');
@@ -251,8 +251,8 @@ function loadState() {
 }
 
 $sheetImageUrl.addEventListener('change', setSheetImage);
-$copyHtml.addEventListener('click', copyHtml);
-$copyCss.addEventListener('click', copyCss);
+$downloadHtml.addEventListener('click', downloadHtml);
+$downloadCss.addEventListener('click', downloadCss);
 
 $addProp.addEventListener('click', () => {
   $hotkeysInfo.hidden = true;
@@ -466,14 +466,24 @@ function getNextId() {
     : 1;
 }
 
-function copyHtml() {
-  alert('HTML copied to clipboard');
-  return navigator.clipboard.writeText($sheet.outerHTML);
+function downloadHtml() {
+  downloadFile('sheetmagic.html', $sheet.outerHTML);
 }
 
-function copyCss() {
-  alert('CSS copied to clipboard');
-  return navigator.clipboard.writeText($sheetStyle.innerHTML);
+function downloadCss() {
+  downloadFile('sheetmagic.css', $sheetStyle.innerHTML);
+}
+
+function downloadFile(filename, textContent) {
+  fetch('https://api.countapi.xyz/hit/oskaerik.github.io/downloads');
+  const encoded = encodeURIComponent(textContent);
+  const downloadLink = document.createElement('a');
+  downloadLink.setAttribute('href', `data:text/plain;charset=utf-8,${encoded}`);
+  downloadLink.setAttribute('download', filename);
+  downloadLink.style.display = 'none';
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
 }
 
 function updateSheetStyle() {
