@@ -1,11 +1,11 @@
 {
-  "name": "Flet",
-  "short_name": "Flet",
+  "name": "the eval game",
+  "short_name": "theevalgame",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0175C2",
-  "description": "Flet - the fastest way to build Flutter apps in Python",
+  "description": "A game testing your Python skills, inspired by The Password Game.",
   "orientation": "natural",
   "prefer_related_applications": false,
   "icons": [
